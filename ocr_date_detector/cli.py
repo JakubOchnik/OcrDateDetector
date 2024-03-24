@@ -78,7 +78,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 )
 @click.option("--gpu", default=False, help="Use GPU for enhanced OCR performance")
 @click.option("--exif", default=True, help="Try to detect date from EXIF metadata (if available)")
-@click.option("--name_pattern", default="img_{date}", help="Format")
+@click.option("--name_pattern", default="img_{date}", help="File name format. Placeholders: {date}, {name}")
 @click.option("--verbose", default=False, help="Print debug logs")
 @click.argument("directory")
 def main(ocr, ocr_optimize, gpu, exif, name_pattern, debug, dir):

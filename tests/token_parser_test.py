@@ -1,5 +1,6 @@
 import pytest
-from utils.TokenParser import parse_name_string, Token, TokenType, get_file_name
+
+from ocr_date_detector.filename_parser import parse_name_string, Token, TokenType, get_file_name
 
 def expect_parser_output(input, expected):
     tokens = parse_name_string(input)

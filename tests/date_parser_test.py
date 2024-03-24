@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 
-from date.DateParser import DateParser
+from ocr_date_detector.date_parser import DateParser
 
 def get_date(date, format = "%d-%m-%Y"):
     return datetime.strptime(date, format)
