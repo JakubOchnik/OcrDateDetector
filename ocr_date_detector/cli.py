@@ -1,6 +1,8 @@
 import os
 import click
-import ocr_date_detector.exif as exif, ocr_date_detector.filename_parser as filename_parser, ocr_date_detector.ocr_reader as ocr_reader
+from ocr_date_detector.exif import get_date_from_exif
+from ocr_date_detector.filename_parser import parse_name_string, get_file_name
+from ocr_date_detector.ocr_reader import OcrDetector
 from pathlib import Path
 
 
@@ -30,27 +32,29 @@ MONTH_MAPPING_LOCAL = [
 ]
 
 
-def establish_date(image, use_exif, use_ocr, gpu, ocr_optimize, debug):
-    print("Processing {}".format(image))
+def determine_date(src_image_path, use_exif, use_ocr, gpu, ocr_optimize, debug):
+    image_path = str(src_image_path)
+    print("Processing {}".format(image_path))
     if use_exif:
-        date = exif.get_date_from_exif(image, debug)
+        date = get_date_from_exif(str(image_path), debug)
         if date:
             return date
     if not use_ocr:
         return
-    ocr = ocr_reader(OCR_LANGUAGES, MONTH_MAPPING_LOCAL, gpu, ocr_optimize, debug)
-    return ocr.get_date_ocr(image)
+    ocr = OcrDetector(OCR_LANGUAGES, MONTH_MAPPING_LOCAL, gpu, ocr_optimize, debug)
+    return ocr.get_date_ocr(image_path)
 
 
 def rename_file(date, file_path, file_extension, name_tokens):
     output_date = date.strftime("%Y-%m-%d")
-    file_name = Path(file_path).stem
-    base_name = filename_parser.get_file_name(output_date, file_name, name_tokens)
+    file_name = file_path.stem
+    base_name = get_file_name(output_date, file_name, name_tokens)
     if not base_name:
         print("ERROR: Failed to parse the name string")
         base_name = "img_{}".format(output_date)
         return None
-    full_name = "{}{}".format(base_name, file_extension)
+    base_directory = file_path.parent if file_path.parent is not None else ""
+    full_name = "{}{}".format(base_name, file_extension) if not base_directory else "{}/{}{}".format(base_directory, base_name, file_extension)
 
     number = None
     while os.path.isfile(full_name):
@@ -81,20 +85,19 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
 @click.option("--name_pattern", default="img_{date}", help="File name format. Placeholders: {date}, {name}")
 @click.option("--verbose", default=False, help="Print debug logs")
 @click.argument("directory")
-def main(ocr, ocr_optimize, gpu, exif, name_pattern, debug, dir):
-    name_tokens = filename_parser.parse_name_string(name_pattern)
+def main(ocr, ocr_optimize, gpu, exif, name_pattern, verbose, directory):
+    name_tokens = parse_name_string(name_pattern)
     if not name_tokens:
         print("ERROR: Failed to parse the name pattern ('{}')".format(name_pattern))
     output = []
     not_detected = []
-    for src_file in os.listdir(dir):
-        if os.path.isdir(src_file):
+    for src_file in Path(directory).glob('*'):
+        if src_file.is_dir():
             continue
-        src_file = src_file.lower()
-        _, file_extension = os.path.splitext(src_file)
+        file_extension = src_file.suffix
         if file_extension.lower() not in SUPPORTED_IMAGE_EXTENSIONS:
             continue
-        date = establish_date(src_file, exif, ocr, gpu, ocr_optimize, debug)
+        date = determine_date(src_file, exif, ocr, gpu, ocr_optimize, verbose)
         if date:
             pic = Picture(src_file, date)
             output.append(pic)
