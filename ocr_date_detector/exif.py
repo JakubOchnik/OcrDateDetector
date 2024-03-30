@@ -12,7 +12,7 @@ EXIF_DATE_TAG_IDS = [
 SUPPORTED_EXIF_EXTENSIONS = [".jpg", ".jpeg", ".tif"]
 
 
-def get_date_from_exif(img_path, debug = False):
+def get_date_from_exif(img_path, debug=False):
     """
     Retrieves a date from the EXIF metadata.
 
@@ -26,7 +26,7 @@ def get_date_from_exif(img_path, debug = False):
     """
 
     _, file_extension = os.path.splitext(img_path)
-    if not file_extension in SUPPORTED_EXIF_EXTENSIONS:
+    if file_extension not in SUPPORTED_EXIF_EXTENSIONS:
         if debug:
             print("WARNING: File extension with no EXIF support: {}".format(img_path))
         return None
@@ -41,7 +41,7 @@ def get_date_from_exif(img_path, debug = False):
         if date:
             break
 
-    if date == None:
+    if date is None:
         if debug:
             print("WARNING: Date unavailable in EXIF data: {}".format(img_path))
         return None
