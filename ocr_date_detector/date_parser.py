@@ -5,14 +5,12 @@ from dateutil import parser
 class DateParser:
     def __init__(self, month_mapping=None, debug=False):
         self.month_mapping = month_mapping
-        self.date_parser_locale = (
-            self.__get_locale(month_mapping) if month_mapping else None
-        )
+        self.date_parser_locale = self.__get_locale(month_mapping) if month_mapping else None
         self.debug = debug
         self.DATE_FORMAT_REGEX = [
-            r"[0-9]+/[0-9]+/[0-9]+",       # Example: 11/02/1998
+            r"[0-9]+/[0-9]+/[0-9]+",  # Example: 11/02/1998
             r"[0-9]+-[a-zA-Z]{3}-[0-9]+",  # Example: 11-Feb-1998
-            r"[0-9]+\.[0-9]+\.[0-9]+",     # Example: 11.02.1998
+            r"[0-9]+\.[0-9]+\.[0-9]+",  # Example: 11.02.1998
         ]
 
     def parse_date(self, input):
@@ -20,7 +18,7 @@ class DateParser:
             parsed_date = parser.parse(input, parserinfo=self.date_parser_locale)
             return parsed_date
         except ValueError:
-            print("Failed to detect the date format using default mechanism".format(input))
+            print("Failed to detect the date format using default mechanism: {}".format(input))
             pass
 
         # Likely unknown date+time format - try to parse just the date
@@ -53,6 +51,5 @@ class DateParser:
         try:
             return parser.parse(known_date_part, parserinfo=self.date_parser_locale)
         except ValueError:
-            print(
-                "ERROR: Failed to translate the date format using fallback detection".format(known_date_part))
+            print("ERROR: Failed to translate the date format using fallback detection: {}".format(known_date_part))
             return None

@@ -54,16 +54,21 @@ def rename_file(date, file_path, file_extension, name_tokens):
         base_name = "img_{}".format(output_date)
         return None
     base_directory = file_path.parent if file_path.parent is not None else ""
-    full_name = "{}{}".format(base_name, file_extension) if not base_directory else "{}/{}{}".format(base_directory, base_name, file_extension)
+    full_name = (
+        "{}{}".format(base_name, file_extension)
+        if not base_directory
+        else "{}/{}{}".format(base_directory, base_name, file_extension)
+    )
 
     number = None
     while os.path.isfile(full_name):
-        if number == None:
+        if number is None:
             number = 1
         else:
             number += 1
         full_name = "{}_{}{}".format(base_name, number, file_extension)
     os.rename(file_path, full_name)
+
 
 class Picture:
     def __init__(self, name, date):
@@ -72,6 +77,7 @@ class Picture:
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], show_default=True)
+
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--ocr", default=False, help="Use OCR for detection")
@@ -91,7 +97,7 @@ def main(ocr, ocr_optimize, gpu, exif, name_pattern, verbose, directory):
         print("ERROR: Failed to parse the name pattern ('{}')".format(name_pattern))
     output = []
     not_detected = []
-    for src_file in Path(directory).glob('*'):
+    for src_file in Path(directory).glob("*"):
         if src_file.is_dir():
             continue
         file_extension = src_file.suffix

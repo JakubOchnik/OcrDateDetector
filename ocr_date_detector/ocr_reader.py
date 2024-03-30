@@ -2,12 +2,13 @@ import cv2
 from easyocr import Reader
 from ocr_date_detector.date_parser import DateParser
 
+
 class OcrDetector:
     """
     The main class of the OCRDateDetector.
     """
 
-    def __init__(self, languages = ["en"], month_mapping = None, use_gpu = True, ocr_optimize = True, debug = False):
+    def __init__(self, languages=["en"], month_mapping=None, use_gpu=True, ocr_optimize=True, debug=False):
         """
         Args:
             languages: A list of languages codes (ISO 639) detected during OCR analysis.
@@ -49,9 +50,7 @@ class OcrDetector:
         if self.optimization:
             height, width = src_image.shape[:2]
             # Usually the date would be present in the lower right corner
-            right_bottom_region = src_image[
-                (height // 2) : height, (width // 2) : width
-            ]
+            right_bottom_region = src_image[(height // 2): height, (width // 2): width]
             results = reader.readtext(right_bottom_region)
             if not results:
                 final_date = self.__get_valid_date(results)
